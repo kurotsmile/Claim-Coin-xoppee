@@ -37,7 +37,7 @@ class Shopee:
         self.shop_name = ''
         self.do_get_link_shop = False
         self.go_to_link = None
-        self.random_sleep = random.uniform(8, 15)
+        self.random_sleep = random.uniform(1, 2)
         self.APP_PACKAGE = CONFIG.APP_PACKAGE
         self.CLAIM_TIMES = CONFIG.CLAIM_TIMES
         self.POPUP_AD = XPATHS.POPUP_AD
@@ -147,26 +147,30 @@ class Shopee:
     def start_app(self, msg):       
         
         self.send_log('Starting app')
-        print(f'{self.device_serial} - {self.phone_number}: open app by {msg}')
-        time.sleep(5)
+        print(f'{self.device_serial} - {self.phone_number}: open app by scroll v2 {msg}')
         self.d.app_start(self.APP_PACKAGE, stop=True, use_monkey=True)
-        time.sleep(2)
+        time.sleep(1)
         self.d.freeze_rotation()
         time.sleep(5)
-        if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(25):
-            if self.d.xpath(self.POPUP_BANNER).wait(1):
-                self.click_exist(self.POPUP_CLOSE)
-        if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
-            check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
-            if check == 'Xác nhận':
-                self.close = False
-                self.update_stop_status(True, 'Captcha')
-                self.send_log('Captcha')
+        element = self.d(resourceId='com.shopee.vn:id/icon', description='tab_bar_button_live_streaming')
+        if element.exists:
+            element.click()
+            print("Clicked on the element successfully!")
+        else:
+            if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(25):
+                if self.d.xpath(self.POPUP_BANNER).wait(1):
+                    self.click_exist(self.POPUP_CLOSE)
+            if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
+                check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
+                if check == 'Xác nhận':
+                    self.close = False
+                    self.update_stop_status(True, 'Captcha')
+                    self.send_log('Captcha')
+                    return False
+            if not self.d.xpath(self.LIVE_STREAM_TAB).wait(25):
+                self.send_log('App not started')
+                self.update_stop_status(True, 'captcha - login')
                 return False
-        if not self.d.xpath(self.LIVE_STREAM_TAB).wait(25):
-            self.send_log('App not started')
-            self.update_stop_status(True, 'captcha - login')
-            return False
             
         self.click_exist(self.LIVE_STREAM_TAB)
         if self.d.xpath(self.FIRST_STREAM).wait(5):

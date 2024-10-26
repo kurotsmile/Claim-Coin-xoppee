@@ -145,31 +145,45 @@ class Shopee:
         
     def start_app(self, msg):       
         
-        self.send_log('Starting app')
+        self.send_log('Starting app pee')
         print(f'{self.device_serial} - {self.phone_number}: open app by {msg}')
-        time.sleep(5)
+        time.sleep(1)
         self.d.app_start(self.APP_PACKAGE, stop=True, use_monkey=True)
-        time.sleep(2)
+        time.sleep(1)
+        
+        element = d(resourceId='com.shopee.vn:id/icon', description='tab_bar_button_live_streaming')
+        if element.exists:
+            element.click()  # Click vào phần tử
+            print("Clicked on the element successfully!")
+
+        if self.d.xpath(self.LIVE_STREAM_TAB).wait(3):
+            self.click_exist(self.LIVE_STREAM_TAB)
+            print("Tim thay nut live")
+        else:
+            print("Kho co nut live tream")
+
+
         self.d.freeze_rotation()
-        time.sleep(5)
-        if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(15):
+        time.sleep(1)
+        if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(6):
             if self.d.xpath(self.POPUP_BANNER).wait(1):
                 self.click_exist(self.POPUP_CLOSE)
-        if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
-            check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
+
+        if self.d.xpath(self.TITLE_TEXT).wait(5):
+            check = self.get_text_xpath(self.TITLE_TEXT)
             if check == 'Xác nhận':
                 self.close = False
                 self.update_stop_status(True, 'Captcha')
                 self.send_log('Captcha')
                 return False
-        if not self.d.xpath(self.LIVE_STREAM_TAB).wait(15):
+        if not self.d.xpath(self.LIVE_STREAM_TAB).wait(10):
             self.send_log('App not started')
             self.update_stop_status(True, 'captcha - login')
             return False
             
         self.click_exist(self.LIVE_STREAM_TAB)
-        #time.sleep(0.5)
-        #self.click_exist(self.LIVE_STREAM_TAB)
+        time.sleep(0.5)
+        self.click_exist(self.LIVE_STREAM_TAB)
         if not self.d.xpath(self.MORE_BTN).wait(15):
             check_live = self.d.xpath(self.MORE_BTN).exists
             try_times = 0

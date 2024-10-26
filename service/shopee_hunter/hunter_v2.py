@@ -146,7 +146,7 @@ class Shopee:
         
     def start_app(self, msg):       
         
-        self.send_log('Starting app')
+        self.send_log('Starting app p2')
         print(f'{self.device_serial} - {self.phone_number}: open app by {msg}')
         time.sleep(5)
         self.d.app_start(self.APP_PACKAGE, stop=True, use_monkey=True)

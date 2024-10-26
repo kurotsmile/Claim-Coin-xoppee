@@ -16,6 +16,7 @@ from worker.worker_scroll import WorkerScrollRun
 from worker.worker_hunter import WorkerHunterRun
 import threading
 import queue
+import random
 from concurrent.futures import ThreadPoolExecutor
 JSON_FILE_PATH = 'device_data.json'
 BOX_JSON_FILE_PATH = 'box.json'
@@ -484,7 +485,11 @@ class MyMainWindow(QMainWindow):
                 claim_count = self.table_widget.item(row, self.col_counts).text()
                 stop_time = self.table_widget.item(row, self.col_timestop).text()
                 device = device_item.text()
-                phone_number = self.table_widget.item(row, self.col_device_number).text()
+                item = self.table_widget.item(row, self.col_device_number)
+                if item is not None:
+                    phone_number = item.text()
+                else:
+                    phone_number = str(random.randint(0, 10))
                 if device not in self.workers:
                     worker = WorkerScrollRun(self.update_table_signal, self.send_link_signal, device, phone_number, total_coin, claim_count, stop_time, min_coin, max_minute, 0)
                     worker.update_table_signal.connect(self.send_data_to_table)

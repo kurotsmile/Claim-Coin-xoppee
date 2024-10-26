@@ -18,5 +18,7 @@ class Xpaths:
     CON_BUT= '//*[@resource-id="com.shopee.vn.dfpluginshopee7:id/tv_confirm"]'
     APP_MENU = '//*[@resource-id="com.sec.android.app.launcher:id/apps_content"]/android.view.ViewGroup[1]/android.view.ViewGroup[1]'
     TRY_AGAIN = '//*[@resource-id="com.shopee.vn.dfpluginshopee7:id/try_again_btn"]'
+    TITLE_TEXT = '//*[@resource-id="com.shopee.vn:id/title_text"]'
 
+    BTN_LIVE='//*[@resource-id="com.shopee.vn:id/btn_switch_live"]'
 XPATHS = Xpaths()

@@ -146,12 +146,13 @@ class Shopee:
     def start_app(self, msg):       
         
         self.send_log('Starting app')
-        print(f'{self.device_serial} - {self.phone_number}: open app by {msg}')
+        print(f'{self.device_serial} - {self.phone_number}: open app by scroll_v1 {msg}')
         time.sleep(5)
         self.d.app_start(self.APP_PACKAGE, stop=True, use_monkey=True)
         time.sleep(2)
         self.d.freeze_rotation()
         time.sleep(5)
+        
         if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(25):
             if self.d.xpath(self.POPUP_BANNER).wait(1):
                 self.click_exist(self.POPUP_CLOSE)
