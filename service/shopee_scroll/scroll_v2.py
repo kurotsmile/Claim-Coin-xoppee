@@ -387,6 +387,8 @@ class Shopee:
                                 self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
                                 self.total_coin_claimed += int(coin_value)
                                 self.update_status(f'Success {coin_value}')
+                                time.sleep(2)
+                                self.d.xpath(XPATHS.CLAIM_POPUP_CLOSE).click_exists(1)
                             continue
                         else:
                             time_get_coin = time_get_coin[-5:]
