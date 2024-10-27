@@ -386,6 +386,7 @@ class Shopee:
                                 self.send_log(f'Lưu {coin_value} Xu thành công!')
                                 self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
                                 self.total_coin_claimed += int(coin_value)
+                                self.update_status(f'Success {coin_value}')
                             continue
                         else:
                             time_get_coin = time_get_coin[-5:]
