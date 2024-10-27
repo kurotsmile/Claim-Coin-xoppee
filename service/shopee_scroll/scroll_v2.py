@@ -145,55 +145,58 @@ class Shopee:
         self.d.swipe(self.width - self.width // 7, self.height - self.height // 5, self.width - self.width // 7, self.height // 9, 0.15)
         
     def start_app(self, msg):       
-        
         self.send_log('Starting app')
         print(f'{self.device_serial} - {self.phone_number}: open app by scroll v2 {msg}')
         self.d.app_start(self.APP_PACKAGE, stop=True, use_monkey=True)
         time.sleep(1)
         self.d.freeze_rotation()
         time.sleep(5)
-        element = self.d(resourceId='com.shopee.vn:id/icon', description='tab_bar_button_live_streaming')
-        if element.exists:
-            element.click()
-            print("Clicked on the element successfully!")
-        else:
-            if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(25):
-                if self.d.xpath(self.POPUP_BANNER).wait(1):
-                    self.click_exist(self.POPUP_CLOSE)
-            if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
-                check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
-                if check == 'Xác nhận':
-                    self.close = False
-                    self.update_stop_status(True, 'Captcha')
-                    self.send_log('Captcha')
-                    return False
-            if not self.d.xpath(self.LIVE_STREAM_TAB).wait(25):
-                self.send_log('App not started')
-                self.update_stop_status(True, 'captcha - login')
-                return False
+        
+        while True:  # Bắt đầu vòng lặp để kiểm tra captcha và thử lại nếu cần
+            element = self.d(resourceId='com.shopee.vn:id/icon', description='tab_bar_button_live_streaming')
+            if element.exists:
+                element.click()
+                print("Clicked on the element successfully!")
+                break  # Thoát vòng lặp nếu click thành công
+            else:
+                # Kiểm tra các popup và captcha
+                if self.d.xpath(self.POPUP_BANNER + '|' + self.LIVE_STREAM_TAB).wait(25):
+                    if self.d.xpath(self.POPUP_BANNER).wait(1):
+                        self.click_exist(self.POPUP_CLOSE)
+                if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
+                    check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
+                    if check == 'Xác nhận':
+                        self.close = False
+                        self.update_stop_status(True, 'Captcha')
+                        self.send_log('Captcha')
+                        self.d.press("back")  # Nhấn nút back nếu gặp captcha
+                        continue  # Quay lại đầu vòng lặp để kiểm tra lại
+                if not self.d.xpath(self.LIVE_STREAM_TAB).wait(15):
+                    self.send_log('App not started')
+                    self.update_stop_status(True, 'captcha - login')
+                    self.d.press("back")
+                    continue  # Quay lại đầu vòng lặp để kiểm tra lại
             
-        self.click_exist(self.LIVE_STREAM_TAB)
-        if self.d.xpath(self.FIRST_STREAM).wait(5):
-            self.click_exist(self.FIRST_STREAM)
-        #time.sleep(0.5)
-        #self.click_exist(self.LIVE_STREAM_TAB)
-        if not self.d.xpath(self.MORE_BTN).wait(15):
-            check_live = self.d.xpath(self.MORE_BTN).exists
-            try_times = 0
-            while check_live:
-                time.sleep(10)
-                self.click_exist(self.LIVE_STREAM_TAB)
+            # Sau khi các kiểm tra trên hoàn tất mà không gặp captcha
+            self.click_exist(self.LIVE_STREAM_TAB)
+            if self.d.xpath(self.FIRST_STREAM).wait(5):
+                self.click_exist(self.FIRST_STREAM)
+            if not self.d.xpath(self.MORE_BTN).wait(15):
                 check_live = self.d.xpath(self.MORE_BTN).exists
-                try_times += 1
-                if try_times > 5:
-                    subprocess.run(['adb', '-s', self.device_serial, 'shell', 'am', 'force-stop', self.APP_PACKAGE], check=True)
-                    break
-            del check_live, try_times
-        else :
-            self.send_log('Processing claim')
-            self.open_app +=1
-            #self.d.shell('settings put system accelerometer_rotation 0')
-
+                try_times = 0
+                while check_live:
+                    time.sleep(10)
+                    self.click_exist(self.LIVE_STREAM_TAB)
+                    check_live = self.d.xpath(self.MORE_BTN).exists
+                    try_times += 1
+                    if try_times > 5:
+                        subprocess.run(['adb', '-s', self.device_serial, 'shell', 'am', 'force-stop', self.APP_PACKAGE], check=True)
+                        break
+                del check_live, try_times
+            else:
+                self.send_log('Processing claim')
+                self.open_app += 1
+                break  # Thoát vòng lặp khi không gặp captcha và đã hoàn thành công việc
     
     # def _test(self):
         # while True:
@@ -225,6 +228,7 @@ class Shopee:
                 self.close = False
                 self.update_stop_status(True, 'Captcha')
                 self.send_log('Captcha')
+                self.d.press("back")
                 return False
         # Kiểm tra có biểu tượng sóng trên thanh trạng thái không
         network_icon = self.d(resourceId="com.android.systemui:id/wifi_combo").exists
@@ -307,8 +311,6 @@ class Shopee:
             if not self.d.xpath(self.MORE_BTN).wait(20):
                 self.check_network_connection()
   
-                
-            
             self.click_exist(self.POPUP_AD,1)
             self.check_stop_time()
             
@@ -355,24 +357,40 @@ class Shopee:
                             self.update_stop_status(True, 'Limit count Setp1')
                         time.sleep(self.random_sleep)
                         continue
-                    self.send_log(f'Status: (Live hết xu)')
-                    time.sleep(self.random_sleep)
-                    continue
+                    else:
+                        if self.d.xpath(XPATHS.COIN_STATE).get_text() == 'Lưu':
+                            coin_value = self.d.xpath(XPATHS.COIN_NUM).get_text()
+                            self.send_log(f'Lưu {coin_value} Xu thành công!')
+                            self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
+                            self.total_coin_claimed += int(coin_value)
+                            continue
+                        else:
+                            self.send_log(f'Status: (Live hết xu)')
+                            time.sleep(self.random_sleep)
+                            continue
                 #nếu có xu thì kiểm tra số xu và có nút nhận hay không
                 else:
                     coin_value = self.get_text_xpath(self.COIN_NUM)
                     if coin_value is not None and int(coin_value) < int(self.min_coin):
                         time.sleep(self.random_sleep)
-                        continue  
+                        continue
                     if not self.d.xpath(self.CLAIM_BTN).wait(0.5):
                         time.sleep(5)
                         time_get_coin = self.get_text_xpath(self.CLAIM_COUNT_DOWN)
+                        print("Co xu va thiet lap thoi gian next")
                         if time_get_coin == None:
+                            print("Dat thoi gian sleep time_get_coin: -> "+str(time_get_coin)+" ->5 phút")
+                            time.sleep(5 * 60)
+                            if self.d.xpath(XPATHS.COIN_STATE).get_text() == 'Lưu':
+                                coin_value = self.d.xpath(XPATHS.COIN_NUM).get_text()
+                                self.send_log(f'Lưu {coin_value} Xu thành công!')
+                                self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
+                                self.total_coin_claimed += int(coin_value)
                             continue
                         else:
                             time_get_coin = time_get_coin[-5:]
                             min_get_coin = time_get_coin[:2]
-                            #print(min_get_coin)
+                            print("Dat thoi gian sleep "+str(time_get_coin))
                         if min_get_coin.isdigit() and int(min_get_coin) > int(self.max_minute):
                             time.sleep(self.random_sleep)
                             continue
@@ -414,8 +432,16 @@ class Shopee:
                             min_get_coin = time_get_coin[:2]
                         if min_get_coin.isdigit() and int(min_get_coin) > int(self.max_minute):
                             time.sleep(self.random_sleep)
+                            print("Timer next pending:"+str(time_get_coin))
                             break
                     
+                    if self.d.xpath(XPATHS.COIN_STATE).get_text() == 'Lưu':
+                        coin_value = self.d.xpath(XPATHS.COIN_NUM).get_text()
+                        self.send_log(f'Lưu {coin_value} Xu thành công!')
+                        self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
+                        self.total_coin_claimed += int(coin_value)
+                        continue
+
                 #print('step 8')
                 self.send_log(f'Claim: {coin_value} ({time_get_coin})')
                 if pending_coin > 3:
