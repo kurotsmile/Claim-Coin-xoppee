@@ -42,6 +42,6 @@ class WorkerScrollRun(QRunnable):
             error_details = traceback.format_exc()
             print(f'{formatted_time} --- {self.phone_serial} error: {error_details}')
             self.update_table_signal.emit(self.phone_serial, [self.shopee.phone_number, self.shopee.total_coin_claimed, self.shopee.claim_counts, self.shopee.stop_time, self.shopee.min_coin, self.shopee.max_minute, self.shopee.not_coin, self.shopee.open_app, 'Error, waiting 10s to retry...', False])
-            time.sleep(10)
+            time.sleep(2)
             self.signals.error.emit(self.phone_serial, [self.shopee.phone_number, self.shopee.total_coin_claimed, self.shopee.claim_counts, self.shopee.stop_time, self.shopee.min_coin, self.shopee.max_minute, self.shopee.open_app, e])
         

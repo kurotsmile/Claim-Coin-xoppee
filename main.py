@@ -226,9 +226,6 @@ class MyMainWindow(QMainWindow):
             button_layout.addWidget(self.start_button_hunter)
         layout.addLayout(button_layout)
 
-
-
-        
         self.load_box_mappings()
         self.refresh_table()
         self.load_data()
