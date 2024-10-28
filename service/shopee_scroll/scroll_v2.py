@@ -229,11 +229,11 @@ class Shopee:
         if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
             check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
             if check == 'Xác nhận':
-                self.close = False
-                self.update_stop_status(True, 'Captcha')
+                #self.close = False
+                #self.update_stop_status(True, 'Captcha')
                 self.send_log('Captcha')
-                self.d.press("back")
-                return False
+                subprocess.run(['adb', 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'])
+                return True
         # Kiểm tra có biểu tượng sóng trên thanh trạng thái không
         network_icon = self.d(resourceId="com.android.systemui:id/wifi_combo").exists
         if self.d.app_current()['package'] != self.APP_PACKAGE:
