@@ -430,28 +430,33 @@ class Shopee:
                     break
                 #nếu có xu thì kiểm tra số xu và có nút nhận hay không
                 else:
-                    #coin_value = self.get_text_xpath(self.COIN_NUM)
-                    #if coin_value is not None and int(coin_value) < int(self.min_coin):
-                        #time.sleep(self.random_sleep)
-                        #break  
+                    coin_value = self.get_text_xpath(self.COIN_NUM)
+                    if coin_value is not None and int(coin_value) < int(self.min_coin):
+                        time.sleep(self.random_sleep)
+                        continue
                     if not self.d.xpath(self.CLAIM_BTN).wait(0.5):
+                        time.sleep(5)
                         time_get_coin = self.get_text_xpath(self.CLAIM_COUNT_DOWN)
+                        print("Co xu va thiet lap thoi gian next")
                         if time_get_coin == None:
-                            break
+                            print("Dat thoi gian sleep time_get_coin: -> "+str(time_get_coin)+" ->5 phút")
+                            time.sleep(5 * 60)
+                            if self.d.xpath(XPATHS.COIN_STATE).get_text() == 'Lưu':
+                                coin_value = self.d.xpath(XPATHS.COIN_NUM).get_text()
+                                self.send_log(f'Lưu {coin_value} Xu thành công!')
+                                self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
+                                self.total_coin_claimed += int(coin_value)
+                                self.update_status(f'Success {coin_value}')
+                                time.sleep(2)
+                                self.d.xpath(XPATHS.CLAIM_POPUP_CLOSE).click_exists(1)
+                            continue
                         else:
                             time_get_coin = time_get_coin[-5:]
                             min_get_coin = time_get_coin[:2]
+                            print("Dat thoi gian sleep "+str(time_get_coin))
                         if min_get_coin.isdigit() and int(min_get_coin) > int(self.max_minute):
                             time.sleep(self.random_sleep)
-                            print("Timer next pending:"+str(time_get_coin))
-                            break
-                    
-                    if self.d.xpath(XPATHS.COIN_STATE).get_text() == 'Lưu':
-                        coin_value = self.d.xpath(XPATHS.COIN_NUM).get_text()
-                        self.send_log(f'Lưu {coin_value} Xu thành công!')
-                        self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
-                        self.total_coin_claimed += int(coin_value)
-                        continue
+                            continue
 
                 #print('step 8')
                 self.send_log(f'Claim: {coin_value} ({time_get_coin})')
