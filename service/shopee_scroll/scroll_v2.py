@@ -169,12 +169,16 @@ class Shopee:
                         self.close = False
                         self.update_stop_status(True, 'Captcha')
                         self.send_log('Captcha')
-                        self.d.press("back")  # Nhấn nút back nếu gặp captcha
+                        subprocess.run([
+                            'adb', 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'
+                        ])
                         continue  # Quay lại đầu vòng lặp để kiểm tra lại
                 if not self.d.xpath(self.LIVE_STREAM_TAB).wait(15):
                     self.send_log('App not started')
                     self.update_stop_status(True, 'captcha - login')
-                    self.d.press("back")
+                    subprocess.run([
+                        'adb', 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'
+                    ])
                     continue  # Quay lại đầu vòng lặp để kiểm tra lại
             
             # Sau khi các kiểm tra trên hoàn tất mà không gặp captcha
@@ -358,11 +362,15 @@ class Shopee:
                         time.sleep(self.random_sleep)
                         continue
                     else:
+                        time.sleep(5 * 60)
                         if self.d.xpath(XPATHS.COIN_STATE).get_text() == 'Lưu':
                             coin_value = self.d.xpath(XPATHS.COIN_NUM).get_text()
                             self.send_log(f'Lưu {coin_value} Xu thành công!')
                             self.d.xpath(XPATHS.COIN_NUM).click_exists(1)
                             self.total_coin_claimed += int(coin_value)
+                            self.update_status(f'Success {coin_value}')
+                            time.sleep(2)
+                            self.d.xpath(XPATHS.CLAIM_POPUP_CLOSE).click_exists(1)
                             continue
                         else:
                             self.send_log(f'Status: (Live hết xu)')
