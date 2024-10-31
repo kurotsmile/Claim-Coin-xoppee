@@ -166,19 +166,30 @@ class Shopee:
                 if self.d.xpath('//*[@resource-id="com.shopee.vn:id/title_text"]').wait(5):
                     check = self.get_text_xpath('//*[@resource-id="com.shopee.vn:id/title_text"]')
                     if check == 'Xác nhận':
-                        self.close = False
-                        self.update_stop_status(True, 'Captcha')
-                        self.send_log('Captcha')
-                        subprocess.run([
-                            'adb', 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'
-                        ])
+                        #self.close = False
+                        #self.update_stop_status(True, 'Captcha')
+                        print("Gap captcha")
+                        #self.update_stop_status(True, 'captcha - login')
+                        subprocess.run(['adb', '-s', self.device_serial, 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'])
+                        time.sleep(10)
+                        result = subprocess.run(
+                            ['adb', '-s', self.device_serial, 'shell', 'input', 'tap', '262', '1520'],
+                            capture_output=True, text=True
+                        )
+                        print(result.stdout)  # In kết quả đầu ra
+                        print(result.stderr)
                         continue  # Quay lại đầu vòng lặp để kiểm tra lại
                 if not self.d.xpath(self.LIVE_STREAM_TAB).wait(15):
                     self.send_log('App not started')
-                    self.update_stop_status(True, 'captcha - login')
-                    subprocess.run([
-                        'adb', 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'
-                    ])
+                    #self.update_stop_status(True, 'captcha - login')
+                    subprocess.run(['adb', '-s', self.device_serial, 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'])
+                    time.sleep(10)
+                    result = subprocess.run(
+                        ['adb', '-s', self.device_serial, 'shell', 'input', 'tap', '262', '1520'],
+                        capture_output=True, text=True
+                    )
+                    print(result.stdout)  # In kết quả đầu ra
+                    print(result.stderr) 
                     continue  # Quay lại đầu vòng lặp để kiểm tra lại
             
             # Sau khi các kiểm tra trên hoàn tất mà không gặp captcha
@@ -232,7 +243,14 @@ class Shopee:
                 #self.close = False
                 #self.update_stop_status(True, 'Captcha')
                 self.send_log('Captcha')
-                subprocess.run(['adb', 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'])
+                subprocess.run(['adb', '-s', self.device_serial, 'shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://vn.shp.ee/Fz7B4d7'])
+                time.sleep(10)
+                result = subprocess.run(
+                    ['adb', '-s', self.device_serial, 'shell', 'input', 'tap', '262', '1520'],
+                    capture_output=True, text=True
+                )
+                print(result.stdout)  # In kết quả đầu ra
+                print(result.stderr) 
                 return True
         # Kiểm tra có biểu tượng sóng trên thanh trạng thái không
         network_icon = self.d(resourceId="com.android.systemui:id/wifi_combo").exists
@@ -511,7 +529,7 @@ class Shopee:
             
             if int(self.claim_counts) >= int(self.CLAIM_TIMES):
                 self.update_stop_status(True, 'claim count Setp2')
-                break
+                break 
             time.sleep(3)
 
             
